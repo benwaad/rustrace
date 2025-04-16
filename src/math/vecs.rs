@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use derive_more::{Add, AddAssign, Constructor, Debug, Display, Neg, Sub};
 use image::Rgb;
 use std::ops::{Div, DivAssign, Mul, MulAssign};
@@ -17,14 +19,6 @@ impl MulAssign<f64> for Vec3 {
         self.z *= rhs;
     }
 }
-// impl Mul<f64> for &Vec3 {
-//     type Output = Vec3;
-//     fn mul(self, rhs: f64) -> Vec3 {
-//         let mut newvec = self.clone();
-//         newvec *= rhs;
-//         newvec
-//     }
-// }
 
 impl Mul<f64> for Vec3 {
     type Output = Vec3;
@@ -35,17 +29,17 @@ impl Mul<f64> for Vec3 {
     }
 }
 
-// impl Div<f64> for &Vec3 {
-//     type Output = Vec3;
-//     fn div(self, rhs: f64) -> Vec3 {
-//         self * (1.0 / rhs)
-//     }
-// }
-
 impl Div<f64> for Vec3 {
     type Output = Vec3;
     fn div(self, rhs: f64) -> Vec3 {
         self * (1.0 / rhs)
+    }
+}
+
+impl Mul<Vec3> for f64 {
+    type Output = Vec3;
+    fn mul(self, rhs: Vec3) -> Self::Output {
+        rhs * self
     }
 }
 
@@ -75,7 +69,7 @@ impl Vec3 {
 }
 
 pub fn dot(left: Vec3, right: Vec3) -> f64 {
-    left.x * right.x + left.y + right.y + left.z * right.z
+    left.x * right.x + left.y * right.y + left.z * right.z
 }
 pub fn cross(left: Vec3, right: Vec3) -> Vec3 {
     Vec3 {
@@ -86,7 +80,7 @@ pub fn cross(left: Vec3, right: Vec3) -> Vec3 {
 }
 
 // Color values are from 0.0 to 1.0
-#[derive(Debug, Display)]
+#[derive(Debug, Display, Add)]
 #[display("{{ {} {} {} }}", r, g, b)]
 pub struct Color {
     pub r: f64,
@@ -106,5 +100,16 @@ impl Into<Rgb<u8>> for Color {
         let ig = (255.999 * self.g) as u8;
         let ib = (255.999 * self.b) as u8;
         Rgb([ir, ig, ib])
+    }
+}
+
+impl Mul<Color> for f64 {
+    type Output = Color;
+    fn mul(self, rhs: Color) -> Self::Output {
+        Color {
+            r: self * rhs.r,
+            g: self * rhs.g,
+            b: self * rhs.b,
+        }
     }
 }

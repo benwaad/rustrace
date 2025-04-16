@@ -1,5 +1,5 @@
 [package]
-name = "raytrace"
+name = "rustrace"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,3 +7,4 @@ edition = "2021"
 derive_more = { version = "2.0.1", features = ["full"]}
 image = "0.25.6"
 indicatif = "0.17.11"
+rand = "0.9.0"
