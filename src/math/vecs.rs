@@ -1,8 +1,10 @@
 #![allow(dead_code)]
 
+use crate::math::*;
 use derive_more::{Add, AddAssign, Constructor, Debug, Display, Neg, Sub};
 use image::Rgb;
-use std::ops::{Div, DivAssign, Mul, MulAssign};
+use rand::prelude::*;
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign};
 
 #[derive(Copy, Debug, Display, Add, AddAssign, Neg, Constructor, Clone, Sub)]
 #[display("[ {} {} {} ]", x, y, z)]
@@ -62,13 +64,47 @@ impl Vec3 {
         x * x + y * y + z * z
     }
 
+    pub fn near_zero(&self) -> bool {
+        const LIM: f64 = 1e-8;
+        (self.x < LIM) && (self.y < LIM) && (self.z < LIM)
+    }
+
     pub fn unit(&self) -> Vec3 {
         let l = self.length();
         Vec3::new(self.x / l, self.y / l, self.z / l)
     }
+
+    pub fn random(rng: &mut ThreadRng) -> Vec3 {
+        let dist = rand::distr::StandardUniform;
+        let (x, y, z) = dist.sample(rng);
+        Vec3::new(x, y, z)
+    }
+
+    pub fn random_range<T: Rng>(min: f64, max: f64, rng: &mut T) -> Vec3 {
+        let dist = rand::distr::Uniform::new(min, max).unwrap();
+        Vec3::new(dist.sample(rng), dist.sample(rng), dist.sample(rng))
+    }
+
+    pub fn random_unit<T: Rng>(rng: &mut T) -> Vec3 {
+        loop {
+            let p = Vec3::random_range(-1.0, 1.0, rng);
+            let l = p.norm();
+            if l <= 1.0 && 1e-160 < l {
+                return p.unit();
+            }
+        }
+    }
+
+    pub fn random_on_hemisphere<T: Rng>(normal: &Vec3, rng: &mut T) -> Vec3 {
+        let mut rand_unit_vec = Vec3::random_unit(rng);
+        if dot(&rand_unit_vec, normal) < 0.0 {
+            rand_unit_vec = -rand_unit_vec;
+        }
+        rand_unit_vec
+    }
 }
 
-pub fn dot(left: Vec3, right: Vec3) -> f64 {
+pub fn dot(left: &Vec3, right: &Vec3) -> f64 {
     left.x * right.x + left.y * right.y + left.z * right.z
 }
 pub fn cross(left: Vec3, right: Vec3) -> Vec3 {
@@ -103,6 +139,14 @@ impl Into<Rgb<u8>> for Color {
     }
 }
 
+impl AddAssign for Color {
+    fn add_assign(&mut self, rhs: Self) {
+        self.r += rhs.r;
+        self.g += rhs.g;
+        self.b += rhs.b;
+    }
+}
+
 impl Mul<Color> for f64 {
     type Output = Color;
     fn mul(self, rhs: Color) -> Self::Output {
@@ -110,6 +154,28 @@ impl Mul<Color> for f64 {
             r: self * rhs.r,
             g: self * rhs.g,
             b: self * rhs.b,
+        }
+    }
+}
+
+impl Mul<Color> for Color {
+    type Output = Color;
+    fn mul(self, rhs: Color) -> Self::Output {
+        Color {
+            r: self.r * rhs.r,
+            g: self.g * rhs.g,
+            b: self.b * rhs.b,
+        }
+    }
+}
+
+impl Mul<&Color> for &Color {
+    type Output = Color;
+    fn mul(self, rhs: &Color) -> Self::Output {
+        Color {
+            r: self.r * rhs.r,
+            g: self.g * rhs.g,
+            b: self.b * rhs.b,
         }
     }
 }

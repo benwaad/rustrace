@@ -1,11 +1,11 @@
 use super::*;
 use crate::math::Interval;
 use crate::ray::*;
-use std::rc::Rc;
+use std::sync::Arc;
 use std::vec::Vec;
 
 pub struct HittableVec<T: Hittable> {
-    objects: Vec<Rc<T>>,
+    objects: Vec<Arc<T>>,
 }
 
 impl<T: Hittable> HittableVec<T> {
@@ -16,12 +16,12 @@ impl<T: Hittable> HittableVec<T> {
     }
     pub fn with_one(object: T) -> Self {
         HittableVec {
-            objects: vec![Rc::new(object)],
+            objects: vec![Arc::new(object)],
         }
     }
 
     pub fn add(&mut self, object: T) {
-        self.objects.push(Rc::new(object));
+        self.objects.push(Arc::new(object));
     }
 
     pub fn clear(&mut self) {
