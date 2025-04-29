@@ -49,7 +49,7 @@ impl Material for Metal {
         rec: &HitRecord,
         _rng: &mut T,
     ) -> (&Color, Option<Ray>) {
-        let scatter_dir = r_in.dir - 2.0 * vecs::dot(&r_in.dir, &rec.normal) * rec.normal;
+        let scatter_dir = vecs::reflect(&r_in.dir, &rec.normal);
         let scattered = Ray::new(rec.p, scatter_dir);
         (&self.albedo, Some(scattered))
     }

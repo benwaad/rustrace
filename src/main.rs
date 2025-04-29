@@ -15,8 +15,8 @@ fn main() {
 
     let material_ground = MaterialKind::lambertian(0.8, 0.8, 0.0);
     let material_center = MaterialKind::lambertian(0.1, 0.2, 0.5);
-    let material_left = MaterialKind::metal(0.8, 0.8, 0.8);
-    let material_right = MaterialKind::metal(0.8, 0.6, 0.2);
+    let material_left = MaterialKind::metal(0.8, 0.8, 0.8, 0.6);
+    let material_right = MaterialKind::metal(0.8, 0.6, 0.2, 1.0);
 
     // World
     let mut world = HittableVec::new();

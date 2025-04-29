@@ -4,7 +4,7 @@ use crate::math::*;
 use derive_more::{Add, AddAssign, Constructor, Debug, Display, Neg, Sub};
 use image::Rgb;
 use rand::prelude::*;
-use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign};
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub};
 
 #[derive(Copy, Debug, Display, Add, AddAssign, Neg, Constructor, Clone, Sub)]
 #[display("[ {} {} {} ]", x, y, z)]
@@ -31,6 +31,26 @@ impl Mul<f64> for Vec3 {
     }
 }
 
+impl Mul<f64> for &Vec3 {
+    type Output = Vec3;
+    fn mul(self, rhs: f64) -> Vec3 {
+        let mut n = self.clone();
+        n *= rhs;
+        n
+    }
+}
+
+impl Mul<&Vec3> for f64 {
+    type Output = Vec3;
+
+    fn mul(self, v: &Vec3) -> Vec3 {
+        Vec3 {
+            x: self * v.x,
+            y: self * v.y,
+            z: self * v.z,
+        }
+    }
+}
 impl Div<f64> for Vec3 {
     type Output = Vec3;
     fn div(self, rhs: f64) -> Vec3 {
@@ -104,6 +124,20 @@ impl Vec3 {
     }
 }
 
+impl Add<&Vec3> for &Vec3 {
+    type Output = Vec3;
+    fn add(self, v: &Vec3) -> Vec3 {
+        Vec3::new(self.x+v.x, self.y+v.y, self.z+v.z)
+    }
+}
+
+impl Sub<&Vec3> for &Vec3 {
+    type Output = Vec3;
+    fn sub(self, v: &Vec3) -> Vec3 {
+        Vec3::new(self.x-v.x, self.y-v.y, self.z-v.z)
+    }
+}
+
 pub fn dot(left: &Vec3, right: &Vec3) -> f64 {
     left.x * right.x + left.y * right.y + left.z * right.z
 }
@@ -113,6 +147,17 @@ pub fn cross(left: Vec3, right: Vec3) -> Vec3 {
         y: left.z * right.x - left.x * right.z,
         z: left.x * right.y - left.y * right.x,
     }
+}
+
+pub fn reflect(v: &Vec3, n: &Vec3) -> Vec3 {
+    v - &(2.0*dot(v,n) * n)
+}
+
+pub fn refract(uv: &Vec3, n: &Vec3, etai_over_etat: f64) -> Vec3 {
+    let cos_theta = f64::min(dot(&-*uv, n), 1.0);
+    let r_out_perp = etai_over_etat * (uv + &(cos_theta*n));
+    let r_out_par = -((1.0-r_out_perp.norm()).abs()).sqrt() * n;
+    r_out_perp + r_out_par
 }
 
 // Color values are from 0.0 to 1.0
